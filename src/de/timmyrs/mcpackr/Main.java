@@ -230,6 +230,7 @@ public class Main
 		textureNameConversions.put("chipped_anvil_top", "anvil_top_damaged_1");
 		textureNameConversions.put("damaged_anvil_top", "anvil_top_damaged_2");
 		textureNameConversions.put("piston_top", "piston_top_normal");
+		textureNameConversions.put("lily_pad", "waterlily");
 		textureNameConversions.put("ink_sac", "dye_powder_black");
 		textureNameConversions.put("lapis_lazuli", "dye_powder_blue");
 		textureNameConversions.put("cocoa_beans", "dye_powder_brown");

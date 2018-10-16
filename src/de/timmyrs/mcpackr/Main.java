@@ -1,6 +1,7 @@
 package de.timmyrs.mcpackr;
 
 import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 
 import javax.imageio.ImageIO;
@@ -319,6 +320,12 @@ public class Main
 		textureNameConversions.put("music_disc_wait", "record_wait");
 		for(PackFormat packFormat : PackFormat.values())
 		{
+			final ArrayList<String> modelPolyfills = new ArrayList<>();
+			if(packFormat.id == 1)
+			{
+				modelPolyfills.add("block/block");
+				modelPolyfills.add("block/thin_block");
+			}
 			System.out.println("Building " + packName + " for " + packFormat.mcversions + "...");
 			final ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(new File(packName + " (" + packFormat.mcversions + ").zip")));
 			for(String file : versions.get(packFormat.id))
@@ -493,6 +500,19 @@ public class Main
 						JsonObject o = Json.parse(new FileReader(new File(file))).asObject();
 						if(packFormat.id < 4)
 						{
+							if(packFormat.id == 1 && o.get("parent") != null)
+							{
+								final String parent = o.get("parent").asString();
+								if(modelPolyfills.contains(parent))
+								{
+									model_polyfill(parent, o);
+									o.remove("parent");
+								}
+								else if(o.get("elements") != null)
+								{
+									System.out.println(file + ": Models can't have `parent` and `elements` before 1.9.");
+								}
+							}
 							JsonObject textures = o.get("textures").asObject();
 							for(JsonObject.Member member : textures)
 							{
@@ -543,6 +563,64 @@ public class Main
 		}
 	}
 
+	private static void model_polyfill(String name, JsonObject o)
+	{
+		final JsonObject display;
+		if(o.get("display") == null)
+		{
+			display = new JsonObject();
+			o.add("display", display);
+		}
+		else
+		{
+			display = o.get("display").asObject();
+		}
+		switch(name)
+		{
+			case "block/block":
+				display.add("gui", new JsonObject()
+						.add("rotation", new JsonArray().add(30).add(255).add(0))
+						.add("translation", new JsonArray().add(0).add(0).add(0))
+						.add("scale", new JsonArray().add(0.625).add(0.625).add(0.625))
+				);
+				display.add("ground", new JsonObject()
+						.add("rotation", new JsonArray().add(0).add(0).add(0))
+						.add("translation", new JsonArray().add(0).add(3).add(0))
+						.add("scale", new JsonArray().add(0.25).add(0.25).add(0.25))
+				);
+				display.add("fixed", new JsonObject()
+						.add("rotation", new JsonArray().add(0).add(0).add(0))
+						.add("translation", new JsonArray().add(0).add(0).add(0))
+						.add("scale", new JsonArray().add(0.5).add(0.5).add(0.5))
+				);
+				display.add("thirdperson", new JsonObject()
+						.add("rotation", new JsonArray().add(75).add(45).add(0))
+						.add("translation", new JsonArray().add(0).add(2.5).add(0))
+						.add("scale", new JsonArray().add(0.375).add(0.375).add(0.375))
+				);
+				display.add("firstperson", new JsonObject()
+						.add("rotation", new JsonArray().add(0).add(45).add(0))
+						.add("translation", new JsonArray().add(0).add(0).add(0))
+						.add("scale", new JsonArray().add(0.40).add(0.40).add(0.40))
+				);
+				break;
+
+			case "block/thin_block":
+				model_polyfill("block/block", o);
+				display.set("thirdperson", new JsonObject()
+						.add("rotation", new JsonArray().add(75).add(45).add(0))
+						.add("translation", new JsonArray().add(0).add(2.5).add(2))
+						.add("scale", new JsonArray().add(0.375).add(0.375).add(0.375))
+				);
+				display.set("firstperson", new JsonObject()
+						.add("rotation", new JsonArray().add(0).add(45).add(0))
+						.add("translation", new JsonArray().add(0).add(4.2).add(0))
+						.add("scale", new JsonArray().add(0.40).add(0.40).add(0.40))
+				);
+				break;
+		}
+	}
+
 	private static void recursivelyIndex(File folder)
 	{
 		final int offset = workingDirectory.getPath().length() + 1;
@@ -558,21 +636,4 @@ public class Main
 			}
 		}
 	}
-
-	/*
-	private static void recursiveDelete(File file) throws IOException
-	{
-		if(file.isDirectory())
-		{
-			for(File f : Objects.requireNonNull(file.listFiles()))
-			{
-				recursiveDelete(f);
-			}
-		}
-		if(!file.delete())
-		{
-			throw new IOException("Failed to delete " + file.getPath());
-		}
-	}
-	*/
 }

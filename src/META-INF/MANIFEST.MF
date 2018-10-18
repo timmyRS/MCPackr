@@ -1,2 +1,2 @@
 Manifest-Version: 1
-Main-Class: de.timmyrs.mcpackr.Main
+Main-Class: de.timmyrs.mcpackr.MCPackr

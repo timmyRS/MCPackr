@@ -3,6 +3,8 @@ package de.timmyrs.mcpackr;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+import de.timmyrs.mcpackr.logging.MCPackrLogger;
+import de.timmyrs.mcpackr.logging.MCPackrStdoutLogger;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -18,42 +20,60 @@ import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class Main
+@SuppressWarnings({"UnusedReturnValue", "WeakerAccess"})
+public class MCPackr
 {
-	private static final ArrayList<String> files = new ArrayList<>();
-	private static final File workingDirectory = new File(System.getProperty("user.dir"));
-	private static final File resourcesRoot = new File(workingDirectory.getPath() + "/assets/minecraft");
+	private static File resourcePackFolder;
+	private static ArrayList<String> files;
 
 	public static void main(String[] args) throws IOException
 	{
-		final File packmetaFile = new File("pack.mcmeta");
+		final File workingDirectory = new File(System.getProperty("user.dir"));
+		packResourcePack(workingDirectory, workingDirectory, new MCPackrStdoutLogger());
+	}
+
+	/**
+	 * Packs the resource pack at `resourcePackFolder` into zips in `outputFolder` and returns File objects of the zips that have been created.
+	 *
+	 * @param logger The logger. Use {@link de.timmyrs.mcpackr.logging.MCPackrNullLogger} for no logging, {@link MCPackrStdoutLogger} for logging to `stdout`, or create your own logger extending {@link MCPackrLogger}.
+	 * @return The files that have been generated or empty on failure.
+	 */
+	public static HashMap<PackFormat, File> packResourcePack(File resourcePackFolder, File outputFolder, MCPackrLogger logger) throws IOException
+	{
+		final HashMap<PackFormat, File> res = new HashMap<>();
+		final File packmetaFile = new File(resourcePackFolder.getPath() + "/pack.mcmeta");
 		if(!packmetaFile.exists() || !packmetaFile.isFile())
 		{
-			System.out.println("Please `cd` into the location of your resource pack and then execute MCPackr again.");
-			return;
+			logger.log("[MCPackr] Resource pack is missing pack.mcmeta.\n");
+			return res;
 		}
 		final JsonObject packmeta = Json.parse(new FileReader(packmetaFile)).asObject().get("pack").asObject();
 		if(packmeta.get("pack_format").asInt() != PackFormat.latest.id)
 		{
-			System.out.println("Your resource pack has to be compatible with " + PackFormat.latest.mcversions + " (pack format " + PackFormat.latest.id + ").");
+			logger.log("[MCPackr] Your resource pack has to be compatible with " + PackFormat.latest.mcversions + " (pack format " + PackFormat.latest.id + ").\n");
+			return res;
 		}
+		final File resourcesRoot = new File(resourcePackFolder.getPath() + "/assets/minecraft");
 		if(!resourcesRoot.exists() || !resourcesRoot.isDirectory())
 		{
-			System.out.println("Your resource pack is missing `assets/minecraft/`.");
+			logger.log("[MCPackr] Your resource pack is missing `assets/minecraft/`.\n");
+			return res;
 		}
-		final String packName = workingDirectory.getName();
+		final String packName = resourcePackFolder.getName();
 		for(PackFormat packFormat : PackFormat.values())
 		{
-			final File outputFile = new File(packName + " (" + packFormat.mcversions + ").zip");
+			final File outputFile = new File(outputFolder.getPath() + "/" + packName + " (" + packFormat.mcversions + ").zip");
 			if(outputFile.exists() && outputFile.isFile() && !outputFile.delete())
 			{
-				System.out.println("Failed to delete " + outputFile.getPath());
-				return;
+				logger.log("[MCPackr] Failed to delete " + outputFile.getPath() + "\n");
+				return res;
 			}
 		}
-		System.out.println("Indexing " + packName + "...");
-		recursivelyIndex(workingDirectory);
-		System.out.println("Resolving version-specific files...");
+		logger.log("[MCPackr] Indexing " + packName + "...\n");
+		files = new ArrayList<>();
+		MCPackr.resourcePackFolder = resourcePackFolder;
+		recursivelyIndex(resourcePackFolder);
+		logger.log("[MCPackr] Resolving version-specific files...\n");
 		final HashMap<Integer, ArrayList<String>> versions = new HashMap<>();
 		for(PackFormat packFormat : PackFormat.values())
 		{
@@ -76,7 +96,7 @@ public class Main
 				}
 			}
 		}
-		System.out.println("Building conversion tables...");
+		logger.log("[MCPackr] Building conversion tables...\n");
 		final HashMap<String, String> blockstateNameConversion = new HashMap<>();
 		final HashMap<String, String> modelNameConversions = new HashMap<>();
 		final HashMap<String, String> textureNameConversions = new HashMap<>();
@@ -327,8 +347,9 @@ public class Main
 				modelPolyfills.add("block/block");
 				modelPolyfills.add("block/thin_block");
 			}
-			System.out.println("Building " + packName + " for " + packFormat.mcversions + "...");
-			final ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(new File(packName + " (" + packFormat.mcversions + ").zip")));
+			final File zipFile = new File(resourcePackFolder + "/" + packName + " (" + packFormat.mcversions + ").zip");
+			logger.log("[MCPackr] Building " + zipFile.getName() + "...\n");
+			final ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(zipFile));
 			for(String file : versions.get(packFormat.id))
 			{
 				String output_name = file;
@@ -511,7 +532,7 @@ public class Main
 								}
 								else if(o.get("elements") != null)
 								{
-									System.out.println(file + ": Models can't have `parent` and `elements` before 1.9.");
+									logger.log(file + ": Models can't have `parent` and `elements` before 1.9.\n");
 								}
 							}
 							JsonObject textures = o.get("textures").asObject();
@@ -561,7 +582,9 @@ public class Main
 				}
 			}
 			zip.close();
+			res.put(packFormat, zipFile);
 		}
+		return res;
 	}
 
 	private static void model_polyfill(String name, JsonObject o)
@@ -624,7 +647,7 @@ public class Main
 
 	private static void recursivelyIndex(File folder)
 	{
-		final int offset = workingDirectory.getPath().length() + 1;
+		final int offset = resourcePackFolder.getPath().length() + 1;
 		for(File f : Objects.requireNonNull(folder.listFiles()))
 		{
 			if(f.isDirectory())

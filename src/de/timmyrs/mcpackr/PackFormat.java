@@ -7,9 +7,9 @@ public enum PackFormat
 	V3(3, "1.11 - 1.12.2"),
 	V4(4, "1.13 - 1.13.1");
 
-	final static PackFormat latest = PackFormat.V4;
-	final int id;
-	final String mcversions;
+	final public static PackFormat latest = PackFormat.V4;
+	final public int id;
+	final public String mcversions;
 
 	PackFormat(int id, String mcversions)
 	{

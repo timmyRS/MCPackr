@@ -43,3 +43,17 @@ Some files which I recommend you provide:
 The rest should be done by MCPackr, e.g. converting `clock_**.png` and `compass_**.png` into `clock.png` and `compass.png` for the 1.6.1 - 1.8 port.
 
 If something does not work as expected, please [open an issue](https://github.com/timmyrs/MCPackr/issues/new).
+
+## For Developers
+
+As a developer, you can use MCPackr as a library for your Java 8+ projects.
+
+MCPackr depends on [minimal-json](https://github.com/ralfstx/minimal-json), which is bundled in the [MCPackr.jar](https://raw.githubusercontent.com/timmyrs/MCPackr/master/MCPackr.jar).
+If your project is already using minimal-json, use [libMCPackr.jar](https://raw.githubusercontent.com/timmyrs/MCPackr/master/libMCPackr.jar), instead.
+
+When using MCPackr as a library, you have access to the following:
+
+- The `MCPackr.packResourcePack(File resourcePackFolder, File outputFolder, MCPackrLogger logger)` function
+- The `PackFormat` enum
+
+Check the source for more information.

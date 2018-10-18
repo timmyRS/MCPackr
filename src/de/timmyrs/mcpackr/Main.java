@@ -143,6 +143,7 @@ public class Main
 		textureNameConversions.put("chiseled_sandstone", "sandstone_carved");
 		textureNameConversions.put("chiseled_red_sandstone", "red_sandstone_carved");
 		textureNameConversions.put("terracotta", "hardened_clay");
+		textureNameConversions.put("furnace_front", "furnace_front_off");
 		textureNameConversions.put("sandstone", "sandstone_normal");
 		textureNameConversions.put("red_sandstone", "red_sandstone_normal");
 		textureNameConversions.put("nether_quarz_ore", "quarz_ore");

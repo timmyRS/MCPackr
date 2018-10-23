@@ -494,6 +494,10 @@ public class MCPackr
 							{
 								foldername = "assets/minecraft/textures/items/";
 							}
+							else if(foldername.startsWith("assets/minecraft/optifine/"))
+							{
+								foldername = "assets/minecraft/mcpatcher/" + foldername.substring(26);
+							}
 						}
 						output_name = foldername + filename;
 					}

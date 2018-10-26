@@ -107,9 +107,9 @@ public class MCPackr
 			textureNameConversions.put(woodType + "_door_bottom", "door_" + (woodType.equals("oak") ? "wood" : woodType) + "_lower");
 			modelNameConversions.put(woodType + "_door_top_hinge", (woodType.equals("oak") ? "wooden" : woodType) + "_door_top_rh");
 			modelNameConversions.put(woodType + "_door_bottom_hinge", (woodType.equals("oak") ? "wooden" : woodType) + "_door_bottom_rh");
-			textureNameConversions.put(woodType + "_leaves", "leaves_" + woodType);
-			textureNameConversions.put(woodType + "_log", "log_" + woodType);
-			textureNameConversions.put(woodType + "_log_top", "log_" + woodType + "_top");
+			textureNameConversions.put(woodType + "_leaves", "leaves_" + (woodType.equals("dark_oak") ? "big_oak" : woodType));
+			textureNameConversions.put(woodType + "_log", "log_" + (woodType.equals("dark_oak") ? "big_oak" : woodType));
+			textureNameConversions.put(woodType + "_log_top", "log_" + (woodType.equals("dark_oak") ? "big_oak" : woodType) + "_top");
 			textureNameConversions.put(woodType + "_planks", "planks_" + (woodType.equals("dark_oak") ? "big_oak" : woodType));
 			textureNameConversions.put("stripped_" + woodType + "_log", "");
 			textureNameConversions.put("stripped_" + woodType + "_log_top", "");

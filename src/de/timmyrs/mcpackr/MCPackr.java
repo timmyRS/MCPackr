@@ -152,6 +152,7 @@ public class MCPackr
 		textureNameConversions.put("polished_andesite", "stone_andesite_smooth");
 		textureNameConversions.put("grass", "tallgrass");
 		textureNameConversions.put("grass_block_side", "grass_side");
+		textureNameConversions.put("grass_block_snow", "grass_side_snowed");
 		textureNameConversions.put("grass_block_side_overlay", "grass_side_overlay");
 		textureNameConversions.put("grass_block_top", "grass_top");
 		textureNameConversions.put("podzol_side", "dirt_podzol_side");

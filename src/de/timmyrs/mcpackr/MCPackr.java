@@ -238,6 +238,7 @@ public class MCPackr
 		textureNameConversions.put("redstone_torch", "redstone_torch_on");
 		textureNameConversions.put("redstone_lamp", "redstone_lamp_off");
 		textureNameConversions.put("dispenser_front", "dispenser_front_horizontal");
+		textureNameConversions.put("dropper_front", "dropper_front_horizontal");
 		textureNameConversions.put("torch", "torch_on");
 		textureNameConversions.put("bricks", "brick");
 		textureNameConversions.put("chiseled_stone_bricks", "stonebrick_carved");

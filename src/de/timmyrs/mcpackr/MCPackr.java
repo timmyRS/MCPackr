@@ -286,6 +286,7 @@ public class MCPackr
 		textureNameConversions.put("minecart", "minecart_normal");
 		textureNameConversions.put("tnt_minecart", "minecart_tnt");
 		textureNameConversions.put("beef", "beef_raw");
+		textureNameConversions.put("bow", "bow_standby");
 		textureNameConversions.put("cooked_beef", "beef_cooked");
 		textureNameConversions.put("chicken", "chicken_raw");
 		textureNameConversions.put("cooked_chicken", "chicken_cooked");

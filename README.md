@@ -10,9 +10,9 @@ You can easily do that by appending `@1` to the name of the file, so that you wi
 - `1` stands for 1.6.1 - 1.8.9
 - `2` stands for 1.9 - 1.10.2
 - `3` stands for 1.11 - 1.12.2
-- `4` stands for 1.13 - 1.13.1
+- `4` stands for 1.13 - 1.13.2
 
-Note that you don't have to provide a different `pack.mcmeta` file for each version if you would like the resource pack description to contain the compatible Minecraft versions because you can place `%mcversions%` in it, which MCPackr will replace with `1.6.1 - 1.8.9` in the 1.6.1 - 1.8.9, `1.9 - 1.10.2` in the 1.9 - 1.10.2 port, and so on.
+Note that you don't have to provide a different `pack.mcmeta` file for each version — if you would like the resource pack description to contain the compatible Minecraft versions, you can place `%mcversions%` in it, and MCPackr will replace it with `1.6.1 - 1.8.9` in the 1.6.1 - 1.8.9 port, etc.
 
 Some files which I recommend you provide:
 
@@ -40,7 +40,7 @@ Some files which I recommend you provide:
   - `textures/block/bed_head_side.png@2`
   - `textures/block/bed_head_top.png@2`
 
-The rest should be done by MCPackr, e.g. converting `clock_**.png` and `compass_**.png` into `clock.png` and `compass.png` for the 1.6.1 - 1.8 port.
+The rest should be done by MCPackr, e.g. converting `clock_**.png` and `compass_**.png` into `clock.png` and `compass.png` for the 1.6.1 - 1.8.9 port.
 
 If something does not work as expected, please [open an issue](https://github.com/timmyrs/MCPackr/issues/new).
 

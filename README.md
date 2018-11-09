@@ -49,11 +49,6 @@ If something does not work as expected, please [open an issue](https://github.co
 As a developer, you can use MCPackr as a library for your Java 8+ projects.
 
 MCPackr depends on [minimal-json](https://github.com/ralfstx/minimal-json), which is bundled in the [MCPackr.jar](https://raw.githubusercontent.com/timmyrs/MCPackr/master/MCPackr.jar).
-If your project is already using minimal-json, use [libMCPackr.jar](https://raw.githubusercontent.com/timmyrs/MCPackr/master/libMCPackr.jar), instead.
+If your project is already using minimal-json, you can use [libMCPackr.jar](https://raw.githubusercontent.com/timmyrs/MCPackr/master/libMCPackr.jar), which doesn't bundle minimal-json, instead.
 
-When using MCPackr as a library, you have access to the following:
-
-- The `MCPackr.packResourcePack(File resourcePackFolder, File outputFolder, MCPackrLogger logger)` function
-- The `PackFormat` enum
-
-Check the source for more information.
+Once you have MCPackr as a library, [read the docs](https://timmyrs.github.io/MCPackr/) for more information.

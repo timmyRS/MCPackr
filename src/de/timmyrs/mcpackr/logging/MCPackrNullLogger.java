@@ -1,7 +1,7 @@
 package de.timmyrs.mcpackr.logging;
 
 /**
- * A logger to have no logging.
+ * A logger that doesn't log.
  */
 @SuppressWarnings("unused")
 public class MCPackrNullLogger extends MCPackrLogger

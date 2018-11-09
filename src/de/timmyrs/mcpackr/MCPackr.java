@@ -3,8 +3,7 @@ package de.timmyrs.mcpackr;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
-import de.timmyrs.mcpackr.logging.MCPackrLogger;
-import de.timmyrs.mcpackr.logging.MCPackrStdoutLogger;
+import de.timmyrs.mcpackr.logging.*;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -33,10 +32,13 @@ public class MCPackr
 	}
 
 	/**
-	 * Packs the resource pack at `resourcePackFolder` into zips in `outputFolder` and returns File objects of the zips that have been created.
+	 * Packs a resource pack into a zip for each pack format.
 	 *
-	 * @param logger The logger. Use {@link de.timmyrs.mcpackr.logging.MCPackrNullLogger} for no logging, {@link MCPackrStdoutLogger} for logging to `stdout`, or create your own logger extending {@link MCPackrLogger}.
+	 * @param resourcePackFolder The base folder of the resource pack, which should include a pack.mcmeta file.
+	 * @param outputFolder The folder where the zips should be generated in.
+	 * @param logger The logger. Use {@link MCPackrNullLogger} for no logging, {@link MCPackrStdoutLogger} for logging to `stdout`, or create your own logger extending {@link MCPackrLogger}.
 	 * @return The files that have been generated or empty on failure.
+	 * @throws IOException When a file is not found, or could not be written to, etc.
 	 */
 	public static HashMap<PackFormat, File> packResourcePack(File resourcePackFolder, File outputFolder, MCPackrLogger logger) throws IOException
 	{

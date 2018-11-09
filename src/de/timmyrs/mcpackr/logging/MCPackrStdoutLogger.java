@@ -1,7 +1,7 @@
 package de.timmyrs.mcpackr.logging;
 
 /**
- * A logger writing to `stdout` using System.out.print.
+ * A logger logging System.out.print.
  */
 public class MCPackrStdoutLogger extends MCPackrLogger
 {

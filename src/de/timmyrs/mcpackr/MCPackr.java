@@ -79,7 +79,7 @@ public class MCPackr
 		final HashMap<Integer, ArrayList<String>> versions = new HashMap<>();
 		for(PackFormat packFormat : PackFormat.values())
 		{
-			versions.put(packFormat.id, new ArrayList<>());
+			versions.put(packFormat.id, new ArrayList<String>());
 		}
 		for(final String file : files)
 		{
@@ -517,7 +517,14 @@ public class MCPackr
 								if(variant.get("model") != null && variant.get("model").asString().startsWith("block/"))
 								{
 									String model = variant.get("model").asString().substring(6);
-									variant.set("model", modelNameConversions.getOrDefault(model, model));
+									if(modelNameConversions.containsKey(model))
+									{
+										variant.set("model", model);
+									}
+									else
+									{
+										variant.set("model", modelNameConversions.get(model));
+									}
 								}
 							}
 						}

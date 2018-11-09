@@ -46,7 +46,7 @@ If something does not work as expected, please [open an issue](https://github.co
 
 ## For Developers
 
-As a developer, you can use MCPackr as a library for your Java 8+ projects.
+As a developer, you can use MCPackr as a library for your Java 7+ projects.
 
 MCPackr depends on [minimal-json](https://github.com/ralfstx/minimal-json), which is bundled in the [MCPackr.jar](https://raw.githubusercontent.com/timmyrs/MCPackr/master/MCPackr.jar).
 If your project is already using minimal-json, you can use [libMCPackr.jar](https://raw.githubusercontent.com/timmyrs/MCPackr/master/libMCPackr.jar), which doesn't bundle minimal-json, instead.

@@ -39,6 +39,8 @@ Some files which I recommend you provide:
   - `textures/block/bed_head_end.png@2`
   - `textures/block/bed_head_side.png@2`
   - `textures/block/bed_head_top.png@2`
+- Brewing stand without blaze powder:
+  - `textures/gui/container/brewing_stand.png@1`
 
 The rest should be done by MCPackr, e.g. converting `clock_**.png` and `compass_**.png` into `clock.png` and `compass.png` for the 1.6.1 - 1.8.9 port.
 

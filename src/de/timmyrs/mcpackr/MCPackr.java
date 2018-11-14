@@ -519,11 +519,11 @@ public class MCPackr
 									String model = variant.get("model").asString().substring(6);
 									if(modelNameConversions.containsKey(model))
 									{
-										variant.set("model", model);
+										variant.set("model", modelNameConversions.get(model));
 									}
 									else
 									{
-										variant.set("model", modelNameConversions.get(model));
+										variant.set("model", model);
 									}
 								}
 							}

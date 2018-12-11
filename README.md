@@ -1,8 +1,8 @@
 # MCPackr
 
-*Minecraft Resource Pack Backward Compatibility Made Easy.*
+*Minecraft Resource Pack Porting Made Easy.*
 
-If you have a 1.13 resource pack and would like to create ports down to 1.6.1, you can simply [download](https://raw.githubusercontent.com/timmyrs/MCPackr/master/MCPackr.jar) and execute the `MCPackr.jar` the directory of your resource pack and it will generate zip files for all resource pack format versions.
+If you have any resource pack and would like to create ports for every version from 1.6.1 onwards, you can simply download and execute the latest MCPackr build in the directory of your resource pack and it will generate zip files for all resource pack format versions.
 
 However, to get the best possible ports, you will need to provide version-specific files.
 You can easily do that by appending `@1` to the name of the file, so that you will have `inventory.png@1`, for example.
@@ -10,11 +10,11 @@ You can easily do that by appending `@1` to the name of the file, so that you wi
 - `1` stands for 1.6.1 - 1.8.9
 - `2` stands for 1.9 - 1.10.2
 - `3` stands for 1.11 - 1.12.2
-- `4` stands for 1.13 - 1.13.2
+- `4` stands for 1.13+
 
 Note that you don't have to provide a different `pack.mcmeta` file for each version — if you would like the resource pack description to contain the compatible Minecraft versions, you can place `%mcversions%` in it, and MCPackr will replace it with `1.6.1 - 1.8.9` in the 1.6.1 - 1.8.9 port, etc.
 
-Some files which I recommend you provide:
+Some files which I recommend you provide, if your resource pack is 1.13+ — which it should be:
 
 - Inventory without offhand:
   - `textures/gui/container/inventory.png@1`
@@ -42,7 +42,7 @@ Some files which I recommend you provide:
 - Brewing stand without blaze powder:
   - `textures/gui/container/brewing_stand.png@1`
 
-The rest should be done by MCPackr, e.g. converting `clock_**.png` and `compass_**.png` into `clock.png` and `compass.png` for the 1.6.1 - 1.8.9 port.
+The rest should be done by MCPackr.
 
 If something does not work as expected, please [open an issue](https://github.com/timmyrs/MCPackr/issues/new).
 
@@ -50,7 +50,20 @@ If something does not work as expected, please [open an issue](https://github.co
 
 As a developer, you can use MCPackr as a library for your Java 7+ projects.
 
-MCPackr depends on [minimal-json](https://github.com/ralfstx/minimal-json), which is bundled in the [MCPackr.jar](https://raw.githubusercontent.com/timmyrs/MCPackr/master/MCPackr.jar).
-If your project is already using minimal-json, you can use [libMCPackr.jar](https://raw.githubusercontent.com/timmyrs/MCPackr/master/libMCPackr.jar), which doesn't bundle minimal-json, instead.
+There are some dependencies to MCPackr, so either you download and use the binary any other user would use, as the libraries are bundled with it, or you use Maven:
 
-Once you have MCPackr as a library, [read the docs](https://timmyrs.github.io/MCPackr/) for more information.
+    <repositories>
+        <repository>
+            <id>hellsh</id>
+            <url>https://mvn2.hell.sh</url>
+        </repository>
+    </repositories>
+    <dependencies>
+        <dependency>
+            <groupId>de.timmyrs</groupId>
+            <artifactId>mcpackr</artifactId>
+            <version>[1.0.0,2.0)</version>
+        </dependency>
+    </dependencies>
+
+Once you have MCPackr as a library, [the docs](https://timmyrs.github.io/MCPackr/) can tell you what it can do for you.

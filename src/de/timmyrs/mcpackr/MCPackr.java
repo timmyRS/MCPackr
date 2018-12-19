@@ -1,7 +1,9 @@
 package de.timmyrs.mcpackr;
 
 import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,10 +104,7 @@ public class MCPackr
 		}
 		logger.info("Indexing resource pack...");
 		final ArrayList<String> files = recursivelyIndex(resourcePackFolder, resourcePackFolder.getPath().length() + 1);
-		if(sourcePackFormat < 4 && files.contains("assets/minecraft/textures/particle/particles.png") && !files.contains("assets/minecraft/textures/particle/particles.png@4"))
-		{
-			logger.warn("The particles.png will be missing in the 1.13+ version. Either create a version-specific file or upgrade your resource pack to 1.13+.");
-		}
+		final ArrayList<String> complaints = new ArrayList<>();
 		final HashMap<Integer, ArrayList<String>> versions = new HashMap<>();
 		for(PackFormat packFormat : PackFormat.values())
 		{
@@ -327,6 +326,7 @@ public class MCPackr
 					{
 						if(!isVersionSpecific && output_name.equals("assets/minecraft/textures/particle/particles.png"))
 						{
+							complain(complaints, output_name + ": will not be present in 1.13+ ports. Either create a version-specific file or upgrade your resource pack to 1.13+.");
 							continue;
 						}
 						if(dirname.startsWith("assets/minecraft/mcpatcher/"))
@@ -338,46 +338,71 @@ public class MCPackr
 					if(dirname.equals("assets/minecraft/blockstates/"))
 					{
 						final JsonObject o = Json.parse(new FileReader(new File(file))).asObject();
-						for(JsonObject.Member member : o.get("variants").asObject())
+						final JsonObject variants = o.get("variants").asObject();
+						for(JsonObject.Member member : variants)
 						{
-							final JsonObject variant = member.getValue().asObject();
-							String model = null;
-							if(sourcePackFormat >= 4)
+							final JsonArray _value;
+							if(member.getValue().isArray())
 							{
-								if(variant.get("model") != null && variant.get("model").asString().startsWith(fromBlocksDir))
+								_value = member.getValue().asArray();
+							}
+							else if(member.getValue().isObject())
+							{
+								_value = new JsonArray().add(member.getValue().asObject());
+							}
+							else
+							{
+								complain(complaints, output_name + ": Variant \"" + member.getName() + "\" is of an invalid type.");
+								continue;
+							}
+							final JsonArray value = new JsonArray();
+							for(JsonValue _props : _value.values())
+							{
+								if(!_props.isObject())
 								{
-									model = variant.get("model").asString().substring(fromBlocksDir.length());
+									continue;
 								}
-							}
-							else if(variant.get("model") != null)
-							{
-								model = variant.get("model").asString();
-							}
-							if(model != null)
-							{
-								if(packFormat.id >= 4)
+								final JsonObject props = _props.asObject();
+								String model = null;
+								if(sourcePackFormat >= 4)
 								{
-									if(ct.models.containsKey(model))
+									if(props.get("model") != null && props.get("model").asString().startsWith(fromBlocksDir))
 									{
-										variant.set("model", toBlocksDir + ct.models.get(model));
+										model = props.get("model").asString().substring(fromBlocksDir.length());
+									}
+								}
+								else if(props.get("model") != null)
+								{
+									model = props.get("model").asString();
+								}
+								if(model != null)
+								{
+									if(packFormat.id >= 4)
+									{
+										if(ct.models.containsKey(model))
+										{
+											props.set("model", toBlocksDir + ct.models.get(model));
+										}
+										else
+										{
+											props.set("model", toBlocksDir + model);
+										}
 									}
 									else
 									{
-										variant.set("model", toBlocksDir + model);
+										if(ct.models.containsKey(model))
+										{
+											props.set("model", ct.models.get(model));
+										}
+										else
+										{
+											props.set("model", model);
+										}
 									}
 								}
-								else
-								{
-									if(ct.models.containsKey(model))
-									{
-										variant.set("model", ct.models.get(model));
-									}
-									else
-									{
-										variant.set("model", model);
-									}
-								}
+								value.add(props);
 							}
+							variants.set(member.getName(), value);
 						}
 						final byte[] bytes = o.toString().getBytes();
 						zip.putNextEntry(new ZipEntry(output_name));
@@ -391,35 +416,38 @@ public class MCPackr
 						{
 							o.remove("parent");
 						}
-						final JsonObject textures = o.get("textures").asObject();
-						for(JsonObject.Member member : textures)
+						if(o.get("textures") != null)
 						{
-							String path = member.getValue().asString();
-							if(path.startsWith(fromBlocksDir))
+							final JsonObject textures = o.get("textures").asObject();
+							for(JsonObject.Member member : textures)
 							{
-								path = path.substring(fromBlocksDir.length());
-								if(ct.textures.containsKey(path))
+								String path = member.getValue().asString();
+								if(path.startsWith(fromBlocksDir))
 								{
-									path = toBlocksDir + ct.textures.get(path);
+									path = path.substring(fromBlocksDir.length());
+									if(ct.textures.containsKey(path))
+									{
+										path = toBlocksDir + ct.textures.get(path);
+									}
+									else
+									{
+										path = toBlocksDir + path;
+									}
+									textures.set(member.getName(), path);
 								}
-								else
+								else if(path.startsWith(fromItemsDir))
 								{
-									path = toBlocksDir + path;
+									path = path.substring(fromBlocksDir.length());
+									if(ct.textures.containsKey(path))
+									{
+										path = toItemsDir + ct.textures.get(path);
+									}
+									else
+									{
+										path = toItemsDir + path;
+									}
+									textures.set(member.getName(), path);
 								}
-								textures.set(member.getName(), path);
-							}
-							else if(path.startsWith(fromItemsDir))
-							{
-								path = path.substring(fromBlocksDir.length());
-								if(ct.textures.containsKey(path))
-								{
-									path = toItemsDir + ct.textures.get(path);
-								}
-								else
-								{
-									path = toItemsDir + path;
-								}
-								textures.set(member.getName(), path);
 							}
 						}
 						final byte[] bytes = o.toString().getBytes();
@@ -439,7 +467,27 @@ public class MCPackr
 			zip.close();
 			res.put(packFormat, zipFile);
 		}
+		if(complaints.size() > 0)
+		{
+			logger.info("The resource pack has been ported. However, there are some complaints:");
+			for(String complaint : complaints)
+			{
+				logger.warn(complaint);
+			}
+		}
+		else
+		{
+			logger.info("The resource pack has successfully been ported.");
+		}
 		return res;
+	}
+
+	private static void complain(ArrayList<String> complaints, String complaint)
+	{
+		if(!complaints.contains(complaint))
+		{
+			complaints.add(complaint);
+		}
 	}
 
 	private static String twoDigitNumberString(int i)

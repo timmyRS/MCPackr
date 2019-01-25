@@ -242,6 +242,12 @@ public class ConversionTables
 			ct.textures.put("wheat_seeds", "seeds_wheat");
 			ct.textures.put("sugar_cane", "reeds");
 			ct.textures.put("redstone", "redstone_dust");
+			ct.textures.put("armor_stand", "wooden_armorstand");
+			ct.textures.put("wooden_axe", "wood_axe");
+			ct.textures.put("wooden_hoe", "wood_hoe");
+			ct.textures.put("wooden_pickaxe", "wood_pickaxe");
+			ct.textures.put("wooden_shovel", "wood_shovel");
+			ct.textures.put("wooden_sword", "wood_sword");
 			ct.textures.put("golden_apple", "apple_golden");
 			ct.textures.put("golden_axe", "gold_axe");
 			ct.textures.put("golden_boots", "gold_boots");

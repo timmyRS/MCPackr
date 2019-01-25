@@ -178,6 +178,8 @@ public class ConversionTables
 			ct.textures.put("chipped_anvil_top", "anvil_top_damaged_1");
 			ct.textures.put("damaged_anvil_top", "anvil_top_damaged_2");
 			ct.textures.put("piston_top", "piston_top_normal");
+			ct.textures.put("nether_portal", "portal");
+			
 			ct.textures.put("lily_pad", "waterlily");
 			ct.textures.put("ink_sac", "dye_powder_black");
 			ct.textures.put("lapis_lazuli", "dye_powder_blue");

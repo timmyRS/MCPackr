@@ -38,7 +38,7 @@ public class MCPackr
 	/**
 	 * Creates a version of a resource pack for each pack format.
 	 *
-	 * @param resourcePackFolder The base folder of the resource pack, which should include a pack.mcmeta file.
+	 * @param resourcePackFolder The base folder of the resource pack, which must contain a pack.mcmeta file.
 	 * @param outputFolder       The folder where the zips should be generated in.
 	 * @return The files that have been generated or empty on failure.
 	 * @throws IOException When there are some unexpected errors with the file system.
@@ -64,7 +64,7 @@ public class MCPackr
 	/**
 	 * Creates a version of a resource pack for each given pack format.
 	 *
-	 * @param resourcePackFolder The base folder of the resource pack, which should include a pack.mcmeta file.
+	 * @param resourcePackFolder The base folder of the resource pack, which must contain a pack.mcmeta file.
 	 * @param outputFolder       The folder where the zips should be generated in.
 	 * @param outputFormats      An array of versions you'd like to the resource pack to be compatible with.
 	 * @return The files that have been generated or empty on failure.

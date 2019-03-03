@@ -1,9 +1,10 @@
 package de.timmyrs.mcpackr;
 
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonArray;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,20 +73,23 @@ public class MCPackr
 	 */
 	public static Map<PackFormat, File> packResourcePack(File resourcePackFolder, File outputFolder, List<PackFormat> outputFormats) throws IOException
 	{
+		final JsonParser jsonParser = new JsonParser();
 		final Logger logger = LoggerFactory.getLogger(MCPackr.class);
 		final HashMap<PackFormat, File> res = new HashMap<>();
 		final File packmetaFile = new File(resourcePackFolder.getPath() + "/pack.mcmeta");
-		final JsonObject packmeta;
+		JsonReader jsonReader;
 		try
 		{
-			packmeta = Json.parse(new FileReader(packmetaFile)).asObject().get("pack").asObject();
+			jsonReader = new JsonReader(new FileReader(packmetaFile));
 		}
 		catch(FileNotFoundException e)
 		{
 			logger.error("The resource pack is missing the pack.mcmeta file.");
 			return res;
 		}
-		final int sourcePackFormat = packmeta.get("pack_format").asInt();
+		jsonReader.setLenient(true);
+		final JsonObject packmeta = jsonParser.parse(jsonReader).getAsJsonObject().get("pack").getAsJsonObject();
+		final int sourcePackFormat = packmeta.get("pack_format").getAsInt();
 		final File resourcesRoot = new File(resourcePackFolder.getPath() + "/assets/minecraft");
 		if(!resourcesRoot.exists() || !resourcesRoot.isDirectory())
 		{
@@ -135,6 +139,7 @@ public class MCPackr
 			final ConversionTables ct = ConversionTables.get(sourcePackFormat, packFormat.id);
 			final File zipFile = new File(resourcePackFolder + "/" + packName + " (" + packFormat.mcversions + ").zip");
 			final ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(zipFile));
+			final ArrayList<String> zipEntries = new ArrayList<>();
 			final String toBlocksDir = (packFormat.id < 4 ? "blocks/" : "block/");
 			final String toItemsDir = (packFormat.id < 4 ? "items/" : "item/");
 			for(String file : versions.get(packFormat.id))
@@ -147,7 +152,10 @@ public class MCPackr
 				}
 				if(file.equals("pack.mcmeta"))
 				{
-					final byte[] bytes = new JsonObject().add("pack", new JsonObject().add("pack_format", packFormat.id).add("description", packmeta.get("description").asString().replace("%mcversions%", packFormat.mcversions))).toString().getBytes();
+					JsonObject packObject = new JsonObject();
+					packObject.addProperty("pack_format", packFormat.id);
+					packObject.addProperty("description", packmeta.get("description").getAsString().replace("%mcversions%", packFormat.mcversions));
+					final byte[] bytes = packObject.toString().getBytes();
 					zip.putNextEntry(new ZipEntry(output_name));
 					zip.write(bytes, 0, bytes.length);
 					zip.closeEntry();
@@ -222,6 +230,11 @@ public class MCPackr
 						{
 							if(file.equals("assets/minecraft/textures/" + fromItemsDir + "compass_00.png"))
 							{
+								if(zipEntries.contains("assets/minecraft/textures/" + toItemsDir + "compass.png"))
+								{
+									complain(complaints, "Tried to pack " + output_name + " multiple times. Is this an inter-compatible resource pack?");
+									continue;
+								}
 								final BufferedImage img = new BufferedImage(16, 512, BufferedImage.TYPE_INT_ARGB);
 								final Graphics2D g = img.createGraphics();
 								for(int i = 0; i < 32; i++)
@@ -237,6 +250,7 @@ public class MCPackr
 								zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "compass.png"));
 								ImageIO.write(img, "png", zip);
 								zip.closeEntry();
+								zipEntries.add("assets/minecraft/textures/" + toItemsDir + "compass.png");
 								final byte[] bytes = "{\"animation\":{}}".getBytes();
 								zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "compass.png.mcmeta"));
 								zip.write(bytes, 0, bytes.length);
@@ -248,6 +262,11 @@ public class MCPackr
 						{
 							if(file.equals("assets/minecraft/textures/item/clock_00.png"))
 							{
+								if(zipEntries.contains("assets/minecraft/textures/" + toItemsDir + "clock.png"))
+								{
+									complain(complaints, "Tried to pack " + output_name + " multiple times. Is this an inter-compatible resource pack?");
+									continue;
+								}
 								final BufferedImage img = new BufferedImage(16, 1024, BufferedImage.TYPE_INT_ARGB);
 								final Graphics2D g = img.createGraphics();
 								for(int i = 0; i < 64; i++)
@@ -263,6 +282,7 @@ public class MCPackr
 								zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "clock.png"));
 								ImageIO.write(img, "png", zip);
 								zip.closeEntry();
+								zipEntries.add("assets/minecraft/textures/" + toItemsDir + "clock.png");
 								final byte[] bytes = "{\"animation\":{}}".getBytes();
 								zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "clock.png.mcmeta"));
 								zip.write(bytes, 0, bytes.length);
@@ -282,6 +302,11 @@ public class MCPackr
 							final BufferedImage img = ImageIO.read(new File("assets/minecraft/textures/" + fromItemsDir + "compass.png"));
 							for(int i = 0; i < 32; i++)
 							{
+								if(zipEntries.contains("assets/minecraft/textures/" + toItemsDir + "compass_" + twoDigitNumberString(i) + ".png"))
+								{
+									complain(complaints, "Tried to pack " + output_name + " multiple times. Is this an inter-compatible resource pack?");
+									continue;
+								}
 								final BufferedImage img_ = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 								final Graphics2D g = img_.createGraphics();
 								g.drawImage(img.getSubimage(0, i * 16, 16, 16), 0, 0, null);
@@ -289,6 +314,7 @@ public class MCPackr
 								zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "compass_" + twoDigitNumberString(i) + ".png"));
 								ImageIO.write(img_, "png", zip);
 								zip.closeEntry();
+								zipEntries.add("assets/minecraft/textures/" + toItemsDir + "compass_" + twoDigitNumberString(i) + ".png");
 							}
 							continue;
 						}
@@ -297,6 +323,11 @@ public class MCPackr
 							final BufferedImage img = ImageIO.read(new File("assets/minecraft/textures/" + fromItemsDir + "clock.png"));
 							for(int i = 0; i < 64; i++)
 							{
+								if(zipEntries.contains("assets/minecraft/textures/" + toItemsDir + "clock_" + twoDigitNumberString(i) + ".png"))
+								{
+									complain(complaints, "Tried to pack " + output_name + " multiple times. Is this an inter-compatible resource pack?");
+									continue;
+								}
 								final BufferedImage img_ = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 								final Graphics2D g = img_.createGraphics();
 								g.drawImage(img.getSubimage(0, i * 16, 16, 16), 0, 0, null);
@@ -304,6 +335,7 @@ public class MCPackr
 								zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "clock_" + twoDigitNumberString(i) + ".png"));
 								ImageIO.write(img_, "png", zip);
 								zip.closeEntry();
+								zipEntries.add("assets/minecraft/textures/" + toItemsDir + "clock_" + twoDigitNumberString(i) + ".png");
 							}
 							continue;
 						}
@@ -337,43 +369,46 @@ public class MCPackr
 					output_name = dirname + filename;
 					if(dirname.equals("assets/minecraft/blockstates/"))
 					{
-						final JsonObject o = Json.parse(new FileReader(new File(file))).asObject();
-						final JsonObject variants = o.get("variants").asObject();
-						for(JsonObject.Member member : variants)
+						jsonReader = new JsonReader(new FileReader(new File(file)));
+						jsonReader.setLenient(true);
+						final JsonObject o = jsonParser.parse(jsonReader).getAsJsonObject();
+						final JsonObject variants = o.get("variants").getAsJsonObject();
+						for(Map.Entry<String, JsonElement> member : variants.entrySet())
 						{
 							final JsonArray _value;
-							if(member.getValue().isArray())
+							if(member.getValue().isJsonArray())
 							{
-								_value = member.getValue().asArray();
+								_value = member.getValue().getAsJsonArray();
 							}
-							else if(member.getValue().isObject())
+							else if(member.getValue().isJsonObject())
 							{
-								_value = new JsonArray().add(member.getValue().asObject());
+								_value = new JsonArray();
+								_value.add(member.getValue().getAsJsonObject());
 							}
 							else
 							{
-								complain(complaints, output_name + ": Variant \"" + member.getName() + "\" is of an invalid type.");
+								complain(complaints, output_name + ": Variant \"" + member.getKey() + "\" is of an invalid type.");
 								continue;
 							}
 							final JsonArray value = new JsonArray();
-							for(JsonValue _props : _value.values())
+							for(JsonElement _props : _value)
 							{
-								if(!_props.isObject())
+								if(!_props.isJsonObject())
 								{
 									continue;
 								}
-								final JsonObject props = _props.asObject();
+								final JsonObject props = _props.getAsJsonObject();
 								String model = null;
 								if(sourcePackFormat >= 4)
 								{
-									if(props.get("model") != null && props.get("model").asString().startsWith(fromBlocksDir))
+									if(props.get("model") != null && props.get("model").getAsString().startsWith(fromBlocksDir))
 									{
-										model = props.get("model").asString().substring(fromBlocksDir.length());
+										model = props.get("model").getAsString().substring(fromBlocksDir.length());
 									}
 								}
 								else if(props.get("model") != null)
 								{
-									model = props.get("model").asString();
+									model = props.get("model").getAsString();
 								}
 								if(model != null)
 								{
@@ -381,47 +416,46 @@ public class MCPackr
 									{
 										if(ct.models.containsKey(model))
 										{
-											props.set("model", toBlocksDir + ct.models.get(model));
+											props.addProperty("model", toBlocksDir + ct.models.get(model));
 										}
 										else
 										{
-											props.set("model", toBlocksDir + model);
+											props.addProperty("model", toBlocksDir + model);
 										}
 									}
 									else
 									{
 										if(ct.models.containsKey(model))
 										{
-											props.set("model", ct.models.get(model));
+											props.addProperty("model", ct.models.get(model));
 										}
 										else
 										{
-											props.set("model", model);
+											props.addProperty("model", model);
 										}
 									}
 								}
 								value.add(props);
 							}
-							variants.set(member.getName(), value);
+							variants.add(member.getKey(), value);
 						}
-						final byte[] bytes = o.toString().getBytes();
-						zip.putNextEntry(new ZipEntry(output_name));
-						zip.write(bytes, 0, bytes.length);
-						zip.closeEntry();
+						addRawZipEntry(zip, zipEntries, output_name, o.toString().getBytes(), complaints);
 					}
 					else if(dirname.startsWith("assets/minecraft/models/"))
 					{
-						final JsonObject o = Json.parse(new FileReader(new File(file))).asObject();
+						jsonReader = new JsonReader(new FileReader(new File(file)));
+						jsonReader.setLenient(true);
+						final JsonObject o = jsonParser.parse(jsonReader).getAsJsonObject();
 						if(packFormat.id == 1 && o.get("parent") != null && o.get("elements") != null)
 						{
 							o.remove("parent");
 						}
 						if(o.get("textures") != null)
 						{
-							final JsonObject textures = o.get("textures").asObject();
-							for(JsonObject.Member member : textures)
+							final JsonObject textures = o.get("textures").getAsJsonObject();
+							for(Map.Entry<String, JsonElement> member : textures.entrySet())
 							{
-								String path = member.getValue().asString();
+								String path = member.getValue().getAsString();
 								if(path.startsWith(fromBlocksDir))
 								{
 									path = path.substring(fromBlocksDir.length());
@@ -433,7 +467,7 @@ public class MCPackr
 									{
 										path = toBlocksDir + path;
 									}
-									textures.set(member.getName(), path);
+									textures.addProperty(member.getKey(), path);
 								}
 								else if(path.startsWith(fromItemsDir))
 								{
@@ -446,21 +480,15 @@ public class MCPackr
 									{
 										path = toItemsDir + path;
 									}
-									textures.set(member.getName(), path);
+									textures.addProperty(member.getKey(), path);
 								}
 							}
 						}
-						final byte[] bytes = o.toString().getBytes();
-						zip.putNextEntry(new ZipEntry(output_name));
-						zip.write(bytes, 0, bytes.length);
-						zip.closeEntry();
+						addRawZipEntry(zip, zipEntries, output_name, o.toString().getBytes(), complaints);
 					}
 					else
 					{
-						final byte[] bytes = Files.readAllBytes(new File(file).toPath());
-						zip.putNextEntry(new ZipEntry(output_name));
-						zip.write(bytes, 0, bytes.length);
-						zip.closeEntry();
+						addRawZipEntry(zip, zipEntries, output_name, Files.readAllBytes(new File(file).toPath()), complaints);
 					}
 				}
 			}
@@ -480,6 +508,21 @@ public class MCPackr
 			logger.info("The resource pack has successfully been ported.");
 		}
 		return res;
+	}
+
+	private static void addRawZipEntry(ZipOutputStream zip, ArrayList<String> zipEntries, String output_name, byte[] bytes, ArrayList<String> complaints) throws IOException
+	{
+		if(zipEntries.contains(output_name))
+		{
+			complain(complaints, "Tried to pack " + output_name + " multiple times. Is this an inter-compatible resource pack?");
+		}
+		else
+		{
+			zip.putNextEntry(new ZipEntry(output_name));
+			zip.write(bytes, 0, bytes.length);
+			zip.closeEntry();
+			zipEntries.add(output_name);
+		}
 	}
 
 	private static void complain(ArrayList<String> complaints, String complaint)

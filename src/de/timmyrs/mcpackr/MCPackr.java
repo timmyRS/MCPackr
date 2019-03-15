@@ -152,10 +152,12 @@ public class MCPackr
 				}
 				if(file.equals("pack.mcmeta"))
 				{
+					JsonObject packMetaObject = new JsonObject();
 					JsonObject packObject = new JsonObject();
 					packObject.addProperty("pack_format", packFormat.id);
 					packObject.addProperty("description", packmeta.get("description").getAsString().replace("%mcversions%", packFormat.mcversions));
-					final byte[] bytes = packObject.toString().getBytes();
+					packMetaObject.add("pack", packObject);
+					final byte[] bytes = packMetaObject.toString().getBytes();
 					zip.putNextEntry(new ZipEntry(output_name));
 					zip.write(bytes, 0, bytes.length);
 					zip.closeEntry();
@@ -545,9 +547,33 @@ public class MCPackr
 
 	private static ArrayList<String> recursivelyIndex(File folder, int offset)
 	{
+		final boolean root = folder.getPath().length() + 1 == offset;
 		final ArrayList<String> files = new ArrayList<>();
 		for(File f : Objects.requireNonNull(folder.listFiles()))
 		{
+			if(root)
+			{
+				switch(f.getName())
+				{
+					case "assets":
+						if(!f.isDirectory())
+						{
+							continue;
+						}
+						break;
+
+					case "pack.mcmeta":
+					case "pack.png":
+						if(!f.isFile())
+						{
+							continue;
+						}
+						break;
+
+					default:
+						continue;
+				}
+			}
 			if(f.isDirectory())
 			{
 				files.addAll(recursivelyIndex(f, offset));

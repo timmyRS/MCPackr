@@ -42,6 +42,8 @@ Some files which I recommend you provide, if your resource pack is 1.13+ — whi
 - Brewing stand without blaze powder:
   - `textures/gui/container/brewing_stand.png@1`
 
+Also ensure that particles and paintings are in a single file, like in the 1.13, because the resource pack version was not changed regardless of 1.14's backward-incompatible changes.
+
 The rest should be done by MCPackr.
 
 If something does not work as expected, please [open an issue](https://github.com/timmyrs/MCPackr/issues/new).

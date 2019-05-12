@@ -203,12 +203,57 @@ public class ResourcePack
 						filename = ct.textures.get(extensionless_name) + extension;
 						if(filename.equals(extension))
 						{
-							continue;
+							continue; // block or item not present in target version, so we don't pack it.
 						}
 					}
 					if(dirname.equals("assets/minecraft/textures/" + fromBlocksDir))
 					{
 						dirname = "assets/minecraft/textures/" + toBlocksDir;
+						if(extensionless_name != null) // Thanks Mojang for not incrementing the pack_format with 1.14
+						{
+							if(packFormat.id >= 4)
+							{
+								switch(extensionless_name)
+								{
+									case "stone_slab_top":
+										addRawZipEntry(zip, zipEntries, dirname + "smooth_stone.png", Files.readAllBytes(new File(file)
+												.toPath()), complaints);
+										break;
+
+									case "stone_slab_side":
+										addRawZipEntry(zip, zipEntries, dirname + "smooth_stone_slab_side.png", Files.readAllBytes(new File(file)
+												.toPath()), complaints);
+								}
+							}
+							if(packFormat.id <= 4 && sourcePackFormat >= 4)
+							{
+								switch(extensionless_name)
+								{
+									case "smooth_stone":
+										if(packFormat.id == 4)
+										{
+											addRawZipEntry(zip, zipEntries, dirname + "stone_slab_top.png", Files.readAllBytes(new File(file)
+													.toPath()), complaints);
+										}
+										else
+										{
+											filename = "stone_slab_top.png";
+										}
+										break;
+
+									case "smooth_stone_slab_side":
+										if(packFormat.id == 4)
+										{
+											addRawZipEntry(zip, zipEntries, dirname + "stone_slab_side.png", Files.readAllBytes(new File(file)
+													.toPath()), complaints);
+										}
+										else
+										{
+											filename = "stone_slab_side.png";
+										}
+								}
+							}
+						}
 					}
 					else
 					{

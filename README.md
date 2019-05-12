@@ -64,7 +64,7 @@ There are some dependencies to MCPackr, so either you download and use the binar
         <dependency>
             <groupId>de.timmyrs</groupId>
             <artifactId>mcpackr</artifactId>
-            <version>[1.1.4,2.0.0)</version>
+            <version>[1.2.0,2.0.0)</version>
         </dependency>
     </dependencies>
 

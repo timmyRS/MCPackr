@@ -173,342 +173,340 @@ public class ResourcePack
 					zip.putNextEntry(new ZipEntry(output_name));
 					zip.write(bytes, 0, bytes.length);
 					zip.closeEntry();
+					continue;
 				}
-				else
+				final String[] arr = output_name.split("/");
+				String filename = arr[arr.length - 1].toLowerCase(Locale.ENGLISH);
+				String dirname = output_name.substring(0, output_name.length() - filename.length())
+						.toLowerCase(Locale.ENGLISH);
+				if(dirname.equals("assets/minecraft/textures/" + fromBlocksDir) || dirname.equals("assets/minecraft/textures/" + fromItemsDir))
 				{
-					final String[] arr = output_name.split("/");
-					String filename = arr[arr.length - 1].toLowerCase(Locale.ENGLISH);
-					String dirname = output_name.substring(0, output_name.length() - filename.length())
-							.toLowerCase(Locale.ENGLISH);
-					if(dirname.equals("assets/minecraft/textures/" + fromBlocksDir) || dirname.equals("assets/minecraft/textures/" + fromItemsDir))
+					final String extensionless_name;
+					final String extension;
+					if(filename.endsWith(".png"))
 					{
-						final String extensionless_name;
-						final String extension;
-						if(filename.endsWith(".png"))
+						extensionless_name = filename.substring(0, filename.length() - 4);
+						extension = ".png";
+					}
+					else if(filename.endsWith(".png.mcmeta"))
+					{
+						extensionless_name = filename.substring(0, filename.length() - 11);
+						extension = ".png.mcmeta";
+					}
+					else
+					{
+						extensionless_name = null;
+						extension = null;
+					}
+					if(extensionless_name != null && ct.textures.containsKey(extensionless_name))
+					{
+						filename = ct.textures.get(extensionless_name) + extension;
+						if(filename.equals(extension))
 						{
-							extensionless_name = filename.substring(0, filename.length() - 4);
-							extension = ".png";
-						}
-						else if(filename.endsWith(".png.mcmeta"))
-						{
-							extensionless_name = filename.substring(0, filename.length() - 11);
-							extension = ".png.mcmeta";
-						}
-						else
-						{
-							extensionless_name = null;
-							extension = null;
-						}
-						if(extensionless_name != null && ct.textures.containsKey(extensionless_name))
-						{
-							filename = ct.textures.get(extensionless_name) + extension;
-							if(filename.equals(extension))
-							{
-								continue;
-							}
-						}
-						if(dirname.equals("assets/minecraft/textures/" + fromBlocksDir))
-						{
-							dirname = "assets/minecraft/textures/" + toBlocksDir;
-						}
-						else
-						{
-							dirname = "assets/minecraft/textures/" + toItemsDir;
+							continue;
 						}
 					}
-					else if(filename.endsWith(".json"))
+					if(dirname.equals("assets/minecraft/textures/" + fromBlocksDir))
 					{
-						String extensionless_name = filename.substring(0, filename.length() - 5);
-						if(dirname.equals("assets/minecraft/blockstates/"))
+						dirname = "assets/minecraft/textures/" + toBlocksDir;
+					}
+					else
+					{
+						dirname = "assets/minecraft/textures/" + toItemsDir;
+					}
+				}
+				else if(filename.endsWith(".json"))
+				{
+					String extensionless_name = filename.substring(0, filename.length() - 5);
+					if(dirname.equals("assets/minecraft/blockstates/"))
+					{
+						if(ct.blockstates.containsKey(extensionless_name))
 						{
-							if(ct.blockstates.containsKey(extensionless_name))
-							{
-								filename = ct.blockstates.get(extensionless_name) + ".json";
-								if(filename.equals(".json"))
-								{
-									continue;
-								}
-							}
-						}
-						else if(dirname.startsWith("assets/minecraft/models/") && ct.models.containsKey(extensionless_name))
-						{
-							filename = ct.models.get(extensionless_name) + ".json";
+							filename = ct.blockstates.get(extensionless_name) + ".json";
 							if(filename.equals(".json"))
 							{
 								continue;
 							}
 						}
 					}
-					if(packFormat.id == 1)
+					else if(dirname.startsWith("assets/minecraft/models/") && ct.models.containsKey(extensionless_name))
 					{
-						if(file.toLowerCase(Locale.ENGLISH)
-								.startsWith("assets/minecraft/textures/" + fromItemsDir + "compass_"))
+						filename = ct.models.get(extensionless_name) + ".json";
+						if(filename.equals(".json"))
 						{
-							if(file.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "compass_00.png"))
-							{
-								if(zipEntries.contains("assets/minecraft/textures/" + toItemsDir + "compass.png"))
-								{
-									complain(complaints, "Tried to pack " + output_name + " multiple times. Is this an inter-compatible resource pack?");
-									continue;
-								}
-								final BufferedImage img = new BufferedImage(16, 512, BufferedImage.TYPE_INT_ARGB);
-								final Graphics2D g = img.createGraphics();
-								for(int i = 0; i < 32; i++)
-								{
-									String is = String.valueOf(i);
-									if(is.length() == 1)
-									{
-										is = "0" + is;
-									}
-									g.drawImage(ImageIO.read(new File("assets/minecraft/textures/" + fromItemsDir + "compass_" + is + ".png")), 0, i * 16, null);
-								}
-								g.dispose();
-								zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "compass.png"));
-								ImageIO.write(img, "png", zip);
-								zip.closeEntry();
-								zipEntries.add("assets/minecraft/textures/" + toItemsDir + "compass.png");
-								final byte[] bytes = "{\"animation\":{}}".getBytes();
-								zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "compass.png.mcmeta"));
-								zip.write(bytes, 0, bytes.length);
-								zip.closeEntry();
-							}
-							continue;
-						}
-						else if(file.toLowerCase(Locale.ENGLISH).startsWith("assets/minecraft/textures/item/clock_"))
-						{
-							if(file.equalsIgnoreCase("assets/minecraft/textures/item/clock_00.png"))
-							{
-								if(zipEntries.contains("assets/minecraft/textures/" + toItemsDir + "clock.png"))
-								{
-									complain(complaints, "Tried to pack " + output_name + " multiple times. Is this an inter-compatible resource pack?");
-									continue;
-								}
-								final BufferedImage img = new BufferedImage(16, 1024, BufferedImage.TYPE_INT_ARGB);
-								final Graphics2D g = img.createGraphics();
-								for(int i = 0; i < 64; i++)
-								{
-									String is = String.valueOf(i);
-									if(is.length() == 1)
-									{
-										is = "0" + is;
-									}
-									g.drawImage(ImageIO.read(new File("assets/minecraft/textures/" + fromItemsDir + "clock_" + is + ".png")), 0, i * 16, null);
-								}
-								g.dispose();
-								zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "clock.png"));
-								ImageIO.write(img, "png", zip);
-								zip.closeEntry();
-								zipEntries.add("assets/minecraft/textures/" + toItemsDir + "clock.png");
-								final byte[] bytes = "{\"animation\":{}}".getBytes();
-								zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "clock.png.mcmeta"));
-								zip.write(bytes, 0, bytes.length);
-								zip.closeEntry();
-							}
 							continue;
 						}
 					}
-					else
+				}
+				if(packFormat.id == 1)
+				{
+					if(file.toLowerCase(Locale.ENGLISH)
+							.startsWith("assets/minecraft/textures/" + fromItemsDir + "compass_"))
 					{
-						if(file.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "compass.png.mcmeta") || file
-								.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "clock.png.mcmeta"))
+						if(file.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "compass_00.png"))
 						{
-							continue;
-						}
-						else if(file.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "compass.png"))
-						{
-							final BufferedImage img = ImageIO.read(new File("assets/minecraft/textures/" + fromItemsDir + "compass.png"));
-							for(int i = 0; i < 32; i++)
+							if(zipEntries.contains("assets/minecraft/textures/" + toItemsDir + "compass.png"))
 							{
-								if(zipEntries.contains("assets/minecraft/textures/" + toItemsDir + "compass_" + twoDigitNumberString(i) + ".png"))
-								{
-									complain(complaints, "Tried to pack " + output_name + " multiple times. Is this an inter-compatible resource pack?");
-									continue;
-								}
-								final BufferedImage img_ = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-								final Graphics2D g = img_.createGraphics();
-								g.drawImage(img.getSubimage(0, i * 16, 16, 16), 0, 0, null);
-								g.dispose();
-								zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "compass_" + twoDigitNumberString(i) + ".png"));
-								ImageIO.write(img_, "png", zip);
-								zip.closeEntry();
-								zipEntries.add("assets/minecraft/textures/" + toItemsDir + "compass_" + twoDigitNumberString(i) + ".png");
-							}
-							continue;
-						}
-						else if(file.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "clock.png"))
-						{
-							final BufferedImage img = ImageIO.read(new File("assets/minecraft/textures/" + fromItemsDir + "clock.png"));
-							for(int i = 0; i < 64; i++)
-							{
-								if(zipEntries.contains("assets/minecraft/textures/" + toItemsDir + "clock_" + twoDigitNumberString(i) + ".png"))
-								{
-									complain(complaints, "Tried to pack " + output_name + " multiple times. Is this an inter-compatible resource pack?");
-									continue;
-								}
-								final BufferedImage img_ = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-								final Graphics2D g = img_.createGraphics();
-								g.drawImage(img.getSubimage(0, i * 16, 16, 16), 0, 0, null);
-								g.dispose();
-								zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "clock_" + twoDigitNumberString(i) + ".png"));
-								ImageIO.write(img_, "png", zip);
-								zip.closeEntry();
-								zipEntries.add("assets/minecraft/textures/" + toItemsDir + "clock_" + twoDigitNumberString(i) + ".png");
-							}
-							continue;
-						}
-					}
-					if(sourcePackFormat >= 4 && packFormat.id < 4)
-					{
-						if(output_name.equals("assets/minecraft/textures/particle/particles.png"))
-						{
-							zip.putNextEntry(new ZipEntry(output_name));
-							ImageIO.write(ImageIO.read(new File(file)).getSubimage(0, 0, 128, 128), "png", zip);
-							zip.closeEntry();
-							continue;
-						}
-						if(dirname.startsWith("assets/minecraft/optifine/"))
-						{
-							dirname = "assets/minecraft/mcpatcher/" + dirname.substring(26);
-						}
-					}
-					else if(sourcePackFormat < 4 && packFormat.id >= 4)
-					{
-						if(!isVersionSpecific && output_name.equals("assets/minecraft/textures/particle/particles.png"))
-						{
-							complain(complaints, output_name + ": will not be present in 1.13+ ports. Either create a version-specific file or upgrade your resource pack to 1.13+.");
-							continue;
-						}
-						if(dirname.startsWith("assets/minecraft/mcpatcher/"))
-						{
-							dirname = "assets/minecraft/optifine/" + dirname.substring(27);
-						}
-					}
-					output_name = dirname + filename;
-					if(dirname.equals("assets/minecraft/blockstates/"))
-					{
-						jsonReader = new JsonReader(new FileReader(new File(file)));
-						jsonReader.setLenient(true);
-						final JsonObject o = jsonParser.parse(jsonReader).getAsJsonObject();
-						final JsonObject variants = o.get("variants").getAsJsonObject();
-						for(Map.Entry<String, JsonElement> member : variants.entrySet())
-						{
-							final JsonArray _value;
-							if(member.getValue().isJsonArray())
-							{
-								_value = member.getValue().getAsJsonArray();
-							}
-							else if(member.getValue().isJsonObject())
-							{
-								_value = new JsonArray();
-								_value.add(member.getValue().getAsJsonObject());
-							}
-							else
-							{
-								complain(complaints, output_name + ": Variant \"" + member.getKey() + "\" is of an invalid type.");
+								complain(complaints, "Tried to pack " + output_name + " multiple times. Is this an inter-compatible resource pack?");
 								continue;
 							}
-							final JsonArray value = new JsonArray();
-							for(JsonElement _props : _value)
+							final BufferedImage img = new BufferedImage(16, 512, BufferedImage.TYPE_INT_ARGB);
+							final Graphics2D g = img.createGraphics();
+							for(int i = 0; i < 32; i++)
 							{
-								if(!_props.isJsonObject())
+								String is = String.valueOf(i);
+								if(is.length() == 1)
 								{
-									continue;
+									is = "0" + is;
 								}
-								final JsonObject props = _props.getAsJsonObject();
-								String model = null;
-								if(sourcePackFormat >= 4)
-								{
-									if(props.get("model") != null && props.get("model")
-											.getAsString()
-											.startsWith(fromBlocksDir))
-									{
-										model = props.get("model").getAsString().substring(fromBlocksDir.length());
-									}
-								}
-								else if(props.get("model") != null)
-								{
-									model = props.get("model").getAsString();
-								}
-								if(model != null)
-								{
-									if(packFormat.id >= 4)
-									{
-										if(ct.models.containsKey(model))
-										{
-											props.addProperty("model", toBlocksDir + ct.models.get(model));
-										}
-										else
-										{
-											props.addProperty("model", toBlocksDir + model);
-										}
-									}
-									else
-									{
-										if(ct.models.containsKey(model))
-										{
-											props.addProperty("model", ct.models.get(model));
-										}
-										else
-										{
-											props.addProperty("model", model);
-										}
-									}
-								}
-								value.add(props);
+								g.drawImage(ImageIO.read(new File("assets/minecraft/textures/" + fromItemsDir + "compass_" + is + ".png")), 0, i * 16, null);
 							}
-							variants.add(member.getKey(), value);
+							g.dispose();
+							zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "compass.png"));
+							ImageIO.write(img, "png", zip);
+							zip.closeEntry();
+							zipEntries.add("assets/minecraft/textures/" + toItemsDir + "compass.png");
+							final byte[] bytes = "{\"animation\":{}}".getBytes();
+							zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "compass.png.mcmeta"));
+							zip.write(bytes, 0, bytes.length);
+							zip.closeEntry();
 						}
-						addRawZipEntry(zip, zipEntries, output_name, o.toString().getBytes(), complaints);
+						continue;
 					}
-					else if(dirname.startsWith("assets/minecraft/models/"))
+					else if(file.toLowerCase(Locale.ENGLISH).startsWith("assets/minecraft/textures/item/clock_"))
 					{
-						jsonReader = new JsonReader(new FileReader(new File(file)));
-						jsonReader.setLenient(true);
-						final JsonObject o = jsonParser.parse(jsonReader).getAsJsonObject();
-						if(packFormat.id == 1 && o.get("parent") != null && o.get("elements") != null)
+						if(file.equalsIgnoreCase("assets/minecraft/textures/item/clock_00.png"))
 						{
-							o.remove("parent");
-						}
-						if(o.get("textures") != null)
-						{
-							final JsonObject textures = o.get("textures").getAsJsonObject();
-							for(Map.Entry<String, JsonElement> member : textures.entrySet())
+							if(zipEntries.contains("assets/minecraft/textures/" + toItemsDir + "clock.png"))
 							{
-								String path = member.getValue().getAsString();
-								if(path.startsWith(fromBlocksDir))
+								complain(complaints, "Tried to pack " + output_name + " multiple times. Is this an inter-compatible resource pack?");
+								continue;
+							}
+							final BufferedImage img = new BufferedImage(16, 1024, BufferedImage.TYPE_INT_ARGB);
+							final Graphics2D g = img.createGraphics();
+							for(int i = 0; i < 64; i++)
+							{
+								String is = String.valueOf(i);
+								if(is.length() == 1)
 								{
-									path = path.substring(fromBlocksDir.length());
-									if(ct.textures.containsKey(path))
-									{
-										path = toBlocksDir + ct.textures.get(path);
-									}
-									else
-									{
-										path = toBlocksDir + path;
-									}
-									textures.addProperty(member.getKey(), path);
+									is = "0" + is;
 								}
-								else if(path.startsWith(fromItemsDir))
+								g.drawImage(ImageIO.read(new File("assets/minecraft/textures/" + fromItemsDir + "clock_" + is + ".png")), 0, i * 16, null);
+							}
+							g.dispose();
+							zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "clock.png"));
+							ImageIO.write(img, "png", zip);
+							zip.closeEntry();
+							zipEntries.add("assets/minecraft/textures/" + toItemsDir + "clock.png");
+							final byte[] bytes = "{\"animation\":{}}".getBytes();
+							zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "clock.png.mcmeta"));
+							zip.write(bytes, 0, bytes.length);
+							zip.closeEntry();
+						}
+						continue;
+					}
+				}
+				else
+				{
+					if(file.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "compass.png.mcmeta") || file
+							.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "clock.png.mcmeta"))
+					{
+						continue;
+					}
+					else if(file.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "compass.png"))
+					{
+						final BufferedImage img = ImageIO.read(new File("assets/minecraft/textures/" + fromItemsDir + "compass.png"));
+						for(int i = 0; i < 32; i++)
+						{
+							if(zipEntries.contains("assets/minecraft/textures/" + toItemsDir + "compass_" + twoDigitNumberString(i) + ".png"))
+							{
+								complain(complaints, "Tried to pack " + output_name + " multiple times. Is this an inter-compatible resource pack?");
+								continue;
+							}
+							final BufferedImage img_ = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+							final Graphics2D g = img_.createGraphics();
+							g.drawImage(img.getSubimage(0, i * 16, 16, 16), 0, 0, null);
+							g.dispose();
+							zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "compass_" + twoDigitNumberString(i) + ".png"));
+							ImageIO.write(img_, "png", zip);
+							zip.closeEntry();
+							zipEntries.add("assets/minecraft/textures/" + toItemsDir + "compass_" + twoDigitNumberString(i) + ".png");
+						}
+						continue;
+					}
+					else if(file.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "clock.png"))
+					{
+						final BufferedImage img = ImageIO.read(new File("assets/minecraft/textures/" + fromItemsDir + "clock.png"));
+						for(int i = 0; i < 64; i++)
+						{
+							if(zipEntries.contains("assets/minecraft/textures/" + toItemsDir + "clock_" + twoDigitNumberString(i) + ".png"))
+							{
+								complain(complaints, "Tried to pack " + output_name + " multiple times. Is this an inter-compatible resource pack?");
+								continue;
+							}
+							final BufferedImage img_ = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+							final Graphics2D g = img_.createGraphics();
+							g.drawImage(img.getSubimage(0, i * 16, 16, 16), 0, 0, null);
+							g.dispose();
+							zip.putNextEntry(new ZipEntry("assets/minecraft/textures/" + toItemsDir + "clock_" + twoDigitNumberString(i) + ".png"));
+							ImageIO.write(img_, "png", zip);
+							zip.closeEntry();
+							zipEntries.add("assets/minecraft/textures/" + toItemsDir + "clock_" + twoDigitNumberString(i) + ".png");
+						}
+						continue;
+					}
+				}
+				if(sourcePackFormat >= 4 && packFormat.id < 4)
+				{
+					if(output_name.equals("assets/minecraft/textures/particle/particles.png"))
+					{
+						zip.putNextEntry(new ZipEntry(output_name));
+						ImageIO.write(ImageIO.read(new File(file)).getSubimage(0, 0, 128, 128), "png", zip);
+						zip.closeEntry();
+						continue;
+					}
+					if(dirname.startsWith("assets/minecraft/optifine/"))
+					{
+						dirname = "assets/minecraft/mcpatcher/" + dirname.substring(26);
+					}
+				}
+				else if(sourcePackFormat < 4 && packFormat.id >= 4)
+				{
+					if(!isVersionSpecific && output_name.equals("assets/minecraft/textures/particle/particles.png"))
+					{
+						complain(complaints, output_name + " will not be present in 1.13+ ports. Either create a version-specific file or upgrade your resource pack to 1.13+.");
+						continue;
+					}
+					if(dirname.startsWith("assets/minecraft/mcpatcher/"))
+					{
+						dirname = "assets/minecraft/optifine/" + dirname.substring(27);
+					}
+				}
+				output_name = dirname + filename;
+				if(dirname.equals("assets/minecraft/blockstates/"))
+				{
+					jsonReader = new JsonReader(new FileReader(new File(file)));
+					jsonReader.setLenient(true);
+					final JsonObject o = jsonParser.parse(jsonReader).getAsJsonObject();
+					final JsonObject variants = o.get("variants").getAsJsonObject();
+					for(Map.Entry<String, JsonElement> member : variants.entrySet())
+					{
+						final JsonArray _value;
+						if(member.getValue().isJsonArray())
+						{
+							_value = member.getValue().getAsJsonArray();
+						}
+						else if(member.getValue().isJsonObject())
+						{
+							_value = new JsonArray();
+							_value.add(member.getValue().getAsJsonObject());
+						}
+						else
+						{
+							complain(complaints, output_name + ": Variant \"" + member.getKey() + "\" is of an invalid type.");
+							continue;
+						}
+						final JsonArray value = new JsonArray();
+						for(JsonElement _props : _value)
+						{
+							if(!_props.isJsonObject())
+							{
+								continue;
+							}
+							final JsonObject props = _props.getAsJsonObject();
+							String model = null;
+							if(sourcePackFormat >= 4)
+							{
+								if(props.get("model") != null && props.get("model")
+										.getAsString()
+										.startsWith(fromBlocksDir))
 								{
-									path = path.substring(fromBlocksDir.length());
-									if(ct.textures.containsKey(path))
-									{
-										path = toItemsDir + ct.textures.get(path);
-									}
-									else
-									{
-										path = toItemsDir + path;
-									}
-									textures.addProperty(member.getKey(), path);
+									model = props.get("model").getAsString().substring(fromBlocksDir.length());
 								}
 							}
+							else if(props.get("model") != null)
+							{
+								model = props.get("model").getAsString();
+							}
+							if(model != null)
+							{
+								if(packFormat.id >= 4)
+								{
+									if(ct.models.containsKey(model))
+									{
+										props.addProperty("model", toBlocksDir + ct.models.get(model));
+									}
+									else
+									{
+										props.addProperty("model", toBlocksDir + model);
+									}
+								}
+								else
+								{
+									if(ct.models.containsKey(model))
+									{
+										props.addProperty("model", ct.models.get(model));
+									}
+									else
+									{
+										props.addProperty("model", model);
+									}
+								}
+							}
+							value.add(props);
 						}
-						addRawZipEntry(zip, zipEntries, output_name, o.toString().getBytes(), complaints);
+						variants.add(member.getKey(), value);
 					}
-					else
+					addRawZipEntry(zip, zipEntries, output_name, o.toString().getBytes(), complaints);
+				}
+				else if(dirname.startsWith("assets/minecraft/models/"))
+				{
+					jsonReader = new JsonReader(new FileReader(new File(file)));
+					jsonReader.setLenient(true);
+					final JsonObject o = jsonParser.parse(jsonReader).getAsJsonObject();
+					if(packFormat.id == 1 && o.get("parent") != null && o.get("elements") != null)
 					{
-						addRawZipEntry(zip, zipEntries, output_name, Files.readAllBytes(new File(file).toPath()), complaints);
+						o.remove("parent");
 					}
+					if(o.get("textures") != null)
+					{
+						final JsonObject textures = o.get("textures").getAsJsonObject();
+						for(Map.Entry<String, JsonElement> member : textures.entrySet())
+						{
+							String path = member.getValue().getAsString();
+							if(path.startsWith(fromBlocksDir))
+							{
+								path = path.substring(fromBlocksDir.length());
+								if(ct.textures.containsKey(path))
+								{
+									path = toBlocksDir + ct.textures.get(path);
+								}
+								else
+								{
+									path = toBlocksDir + path;
+								}
+								textures.addProperty(member.getKey(), path);
+							}
+							else if(path.startsWith(fromItemsDir))
+							{
+								path = path.substring(fromBlocksDir.length());
+								if(ct.textures.containsKey(path))
+								{
+									path = toItemsDir + ct.textures.get(path);
+								}
+								else
+								{
+									path = toItemsDir + path;
+								}
+								textures.addProperty(member.getKey(), path);
+							}
+						}
+					}
+					addRawZipEntry(zip, zipEntries, output_name, o.toString().getBytes(), complaints);
+				}
+				else
+				{
+					addRawZipEntry(zip, zipEntries, output_name, Files.readAllBytes(new File(file).toPath()), complaints);
 				}
 			}
 			zip.close();

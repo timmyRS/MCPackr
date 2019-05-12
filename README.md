@@ -68,4 +68,4 @@ There are some dependencies to MCPackr, so either you download and use the binar
         </dependency>
     </dependencies>
 
-Once you have MCPackr as a library, [the docs](https://timmyrs.github.io/MCPackr/) can tell you what it can do for you.
+Once you have MCPackr as a library, [the docs](https://timmyrs.github.io/MCPackr/de/timmyrs/mcpackr/ResourcePack.html) can tell you what it can do for you.

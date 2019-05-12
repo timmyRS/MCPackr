@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
@@ -153,13 +154,13 @@ public class ResourcePack
 			final String toItemsDir = (packFormat.id < 4 ? "items/" : "item/");
 			for(String file : versions.get(packFormat.id))
 			{
-				String output_name = file;
+				String output_name = file.toLowerCase(Locale.ENGLISH);
 				final boolean isVersionSpecific = file.substring(file.length() - 2, file.length() - 1).equals("@");
 				if(isVersionSpecific)
 				{
 					output_name = file.substring(0, file.length() - 2);
 				}
-				if(file.equals("pack.mcmeta"))
+				if(file.equalsIgnoreCase("pack.mcmeta"))
 				{
 					JsonObject packMetaObject = new JsonObject();
 					JsonObject packObject = new JsonObject();
@@ -176,8 +177,9 @@ public class ResourcePack
 				else
 				{
 					final String[] arr = output_name.split("/");
-					String filename = arr[arr.length - 1];
-					String dirname = output_name.substring(0, output_name.length() - filename.length());
+					String filename = arr[arr.length - 1].toLowerCase(Locale.ENGLISH);
+					String dirname = output_name.substring(0, output_name.length() - filename.length())
+							.toLowerCase(Locale.ENGLISH);
 					if(dirname.equals("assets/minecraft/textures/" + fromBlocksDir) || dirname.equals("assets/minecraft/textures/" + fromItemsDir))
 					{
 						final String extensionless_name;
@@ -239,9 +241,10 @@ public class ResourcePack
 					}
 					if(packFormat.id == 1)
 					{
-						if(file.startsWith("assets/minecraft/textures/" + fromItemsDir + "compass_"))
+						if(file.toLowerCase(Locale.ENGLISH)
+								.startsWith("assets/minecraft/textures/" + fromItemsDir + "compass_"))
 						{
-							if(file.equals("assets/minecraft/textures/" + fromItemsDir + "compass_00.png"))
+							if(file.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "compass_00.png"))
 							{
 								if(zipEntries.contains("assets/minecraft/textures/" + toItemsDir + "compass.png"))
 								{
@@ -271,9 +274,9 @@ public class ResourcePack
 							}
 							continue;
 						}
-						else if(file.startsWith("assets/minecraft/textures/item/clock_"))
+						else if(file.toLowerCase(Locale.ENGLISH).startsWith("assets/minecraft/textures/item/clock_"))
 						{
-							if(file.equals("assets/minecraft/textures/item/clock_00.png"))
+							if(file.equalsIgnoreCase("assets/minecraft/textures/item/clock_00.png"))
 							{
 								if(zipEntries.contains("assets/minecraft/textures/" + toItemsDir + "clock.png"))
 								{
@@ -306,11 +309,12 @@ public class ResourcePack
 					}
 					else
 					{
-						if(file.equals("assets/minecraft/textures/" + fromItemsDir + "compass.png.mcmeta") || file.equals("assets/minecraft/textures/" + fromItemsDir + "clock.png.mcmeta"))
+						if(file.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "compass.png.mcmeta") || file
+								.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "clock.png.mcmeta"))
 						{
 							continue;
 						}
-						else if(file.equals("assets/minecraft/textures/" + fromItemsDir + "compass.png"))
+						else if(file.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "compass.png"))
 						{
 							final BufferedImage img = ImageIO.read(new File("assets/minecraft/textures/" + fromItemsDir + "compass.png"));
 							for(int i = 0; i < 32; i++)
@@ -331,7 +335,7 @@ public class ResourcePack
 							}
 							continue;
 						}
-						else if(file.equals("assets/minecraft/textures/" + fromItemsDir + "clock.png"))
+						else if(file.equalsIgnoreCase("assets/minecraft/textures/" + fromItemsDir + "clock.png"))
 						{
 							final BufferedImage img = ImageIO.read(new File("assets/minecraft/textures/" + fromItemsDir + "clock.png"));
 							for(int i = 0; i < 64; i++)

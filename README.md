@@ -4,6 +4,8 @@
 
 If you have any resource pack and would like to create ports for every version from 1.6.1 onwards, you can simply download and execute the latest MCPackr build in the directory of your resource pack and it will generate zip files for all resource pack format versions.
 
+Alternatively, you can also <code>[cone](https://getcone.org) get mcpackr</code> and simply run `mcpackr` in the directory of your resource pack.
+
 However, to get the best possible ports, you will need to provide version-specific files.
 You can easily do that by appending `@1` to the name of the file, so that you will have `inventory.png@1`, for example.
 
